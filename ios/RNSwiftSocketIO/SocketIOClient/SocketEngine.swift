@@ -197,6 +197,18 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
             reqPolling.allHTTPHeaderFields = headers
         }
+        
+        //send shared cookies when polling
+        if (HTTPCookieStorage.shared.cookies != nil) {
+            var cookieArr:[HTTPCookie] = [];
+            for cookie in HTTPCookieStorage.shared.cookies! {
+                if (cookie.domain.hasSuffix(urlPolling.host!)) {
+                    cookieArr.append(cookie);
+                }
+            }
+            let headers = HTTPCookie.requestHeaderFields(with: cookieArr)
+            reqPolling.allHTTPHeaderFields = headers
+        }
 
         if let extraHeaders = extraHeaders {
             for (headerName, value) in extraHeaders {
@@ -247,6 +259,20 @@ public final class SocketEngine : NSObject, URLSessionDelegate, SocketEnginePoll
 
         if cookies != nil {
             let headers = HTTPCookie.requestHeaderFields(with: cookies!)
+            for (key, value) in headers {
+                ws?.headers[key] = value
+            }
+        }
+        
+        //send shared cookies when websocket
+        if (HTTPCookieStorage.shared.cookies != nil) {
+            var cookieArr:[HTTPCookie] = [];
+            for cookie in HTTPCookieStorage.shared.cookies! {
+                if (cookie.domain.hasSuffix(urlPolling.host!)) {
+                    cookieArr.append(cookie);
+                }
+            }
+            let headers = HTTPCookie.requestHeaderFields(with: cookieArr)
             for (key, value) in headers {
                 ws?.headers[key] = value
             }
